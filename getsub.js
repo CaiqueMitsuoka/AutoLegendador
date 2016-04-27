@@ -10,11 +10,13 @@ var ValidExtensions = ['.3g2', '.3gp', '.3gp2', '.3gpp', '.60d', '.ajp', '.asf',
 '.mov', '.movhd',
 '.movie', '.movx', '.mp4', '.mpe', '.mpeg', '.mpg', '.mpv', '.mpv2', '.mxf', '.nsv', '.nut', '.ogg', '.ogm', '.omf', '.ps', '.qt', '.ram', '.rm', '.rmvb', '.swf',
  '.ts', '.vfw', '.vid', '.video', '.viv', '.vivo', '.vob', '.vro', '.wm', '.wmv', '.wmx', '.wrap', '.wvx', '.wx', '.x264', '.xvid'];
+
+var objLogin = JSON.parse(fs.readFileSync('Login.json'));
 var OSub = new OS({
-    useragent:'OSTestUserAgent', //test useragent. To get you own, see readme on GitHub
-    username: 'USER HERE',
-    password: require('crypto').createHash('md5').update('PASSWORD HERE').digest('hex'),
-    ssl: true
+    useragent: objLogin.Login.useragent, //test useragent. To get you own, see readme on GitHub
+    username: objLogin.Login.username,
+    password: objLogin.Login.password,  //require('crypto').createHash('md5').update('PASSWORD HERE').digest('hex'),
+    ssl: objLogin.Login.ssl
 });
 
 function ValidFile(file) {
@@ -65,7 +67,7 @@ OSub.login()
                         if(subInfo !== null){
                             subName = filename.replace(path.extname(filename),'.srt');
                             var fileSubtitle = fs.createWriteStream(dir + '/' + subName);
-                            var request = http.get(bestSub.url, function(response) {
+                            var request = http.get(subInfo.url, function(response) {
                                 response.pipe(fileSubtitle);
                             });
                             nFileReady++;
@@ -76,7 +78,7 @@ OSub.login()
                         nFileProcess++;
                         //logout, finalize
                         if (nFiles == nFileProcess){
-                            console.log(nFiles + ' files found and ' + nFileReady + 'subtitled');
+                            console.log(nFiles + ' files found and ' + nFileReady + ' subtitled');
                             OSub.api.LogOut(chave);
                             console.log('Finished!');
                         }
