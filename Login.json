@@ -1,0 +1,8 @@
+{
+    "Login":{
+        "useragent":"UserAgent",
+        "username": "User",
+        "password": "Password(md5)",
+        "ssl": true
+    }
+}
