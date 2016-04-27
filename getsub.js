@@ -11,7 +11,7 @@ var ValidExtensions = ['.3g2', '.3gp', '.3gp2', '.3gpp', '.60d', '.ajp', '.asf',
 '.movie', '.movx', '.mp4', '.mpe', '.mpeg', '.mpg', '.mpv', '.mpv2', '.mxf', '.nsv', '.nut', '.ogg', '.ogm', '.omf', '.ps', '.qt', '.ram', '.rm', '.rmvb', '.swf',
  '.ts', '.vfw', '.vid', '.video', '.viv', '.vivo', '.vob', '.vro', '.wm', '.wmv', '.wmx', '.wrap', '.wvx', '.wx', '.x264', '.xvid'];
 
-var objLogin = JSON.parse(fs.readFileSync('Login.json'));
+var objLogin = JSON.parse(fs.readFileSync(path.dirname(process.argv[1]) + '/Login.json'));
 var OSub = new OS({
     useragent: objLogin.Login.useragent, //test useragent. To get you own, see readme on GitHub
     username: objLogin.Login.username,
@@ -46,6 +46,7 @@ OSub.login()
     .then(function(token){
         console.log('Iniciating AutoLegendador...');
         chave = token;
+        console.log(dir);
         fs.readdir(dir, function callback (err, data) {
             // console.log(data);
             if (err !== null){
