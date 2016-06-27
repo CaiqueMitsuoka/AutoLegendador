@@ -1,17 +1,17 @@
-const http = require('http');
-const OS = require('opensubtitles-api');
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const dirFile = process.argv[2];
-const dirProgram = path.dirname(process.argv[1]);
-const objLogin = JSON.parse(fs.readFileSync(dirProgram + '/Login.json'));
-const objConfig = JSON.parse(fs.readFileSync(dirProgram + '/config.json'));
-const rl = readline.createInterface({
+var http = require('http');
+var OS = require('opensubtitles-api');
+var fs = require('fs');
+var path = require('path');
+var readline = require('readline');
+var dirFile = process.argv[2];
+var dirProgram = path.dirname(process.argv[1]);
+var objLogin = JSON.parse(fs.readFileSync(dirProgram + '/Login.json'));
+var objConfig = JSON.parse(fs.readFileSync(dirProgram + '/config.json'));
+var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-const languages = objConfig.Config.languages;
+var languages = objConfig.Config.languages;
 var chave = '';
 var nFiles = 0,nFileProcess = 0, nFileReady = 0;
 var ValidExtensions = ['.3g2', '.3gp', '.3gp2', '.3gpp', '.60d', '.ajp', '.asf', '.asx', '.avchd', '.avi', '.bik', '.bix', '.box', '.cam', '.dat', '.divx', '.dmf', '.dv', '.dvr-ms',
@@ -23,7 +23,7 @@ var ValidExtensions = ['.3g2', '.3gp', '.3gp2', '.3gpp', '.60d', '.ajp', '.asf',
 var OSub = new OS({
     useragent: objLogin.Login.useragent, //test useragent. To get you own, see readme on GitHub
     username: objLogin.Login.username,
-    password: objLogin.Login.password,//objLogin.Login.password,  //require('crypto').createHash('md5').update('PASSWORD HERE').digest('hex'),
+    password: objLogin.Login.password,  //require('crypto').createHash('md5').update('PASSWORD HERE').digest('hex'),
     ssl: objLogin.Login.ssl
 });
 
@@ -38,29 +38,19 @@ function ValidFile(file) {
 function bestSubtitle (objSubtitles){
     var majorScore = -1;
     var bestSub = null;
-    //for (ling in objSubtitles){
-    //    console.log(ling);
-    //    ling.forEach(function(subtitle){
-    //        if(subtitle.score > majorScore){
-    //            bestSub = subtitle;
-    //            majorScore = subtitle.score;
-    //        }else{
-    //            if(subtitle.score == majorScore && subtitle.downloads > bestSub.downloads){
-    //                bestSub = subtitle;
-    //            }
-    //        }
-    //    });
-    //}
-    objSubtitles.pb.forEach(function(subtitle){
-        if(subtitle.score > majorScore){
-            bestSub = subtitle;
-            majorScore = subtitle.score;
-        }else{
-            if(subtitle.score == majorScore && subtitle.downloads > bestSub.downloads){
+    var i;
+    keys = Object.keys(objSubtitles);
+    if (keys == []){
+        return null;
+    }
+    for(i = 0; i < keys.length; i++){
+        objSubtitles[keys[i]].forEach(function(subtitle){
+            if(subtitle.score > majorScore){
                 bestSub = subtitle;
+                majorScore = subtitle.score;
             }
-        }
-    });
+        });
+    }
     return bestSub;
 }
 OSub.login()
@@ -79,25 +69,21 @@ OSub.login()
                     nFiles++;
                     //Video file found !
                     OSub.search({
-                        sublanguageid: languages.join(),//'pob',
+                        sublanguageid: languages.join(),
                         path: dirFile + '/' + filename,
                         filename: filename,
                         extensions: ['srt'],
                         limit: 'all',
                     }).then(function (subtitles) {
-                        //console.log(subtitles);
-                        //if(subtitles === null){
-                            subInfo = bestSubtitle(subtitles);
+                        subInfo = bestSubtitle(subtitles);
+                        if(subInfo != null){
                             subName = filename.replace(path.extname(filename),'.srt');
                             var fileSubtitle = fs.createWriteStream(dirFile + '/' + subName);
                             var request = http.get(subInfo.url, function(response) {
                                 response.pipe(fileSubtitle);
                             });
                             nFileReady++;
-                        //}else{
-                        //    console.log('######################\nSubtitle not found for: ' + filename + '\n######################');
-                        //}
-
+                        }
                         nFileProcess++;
                         //logout, finalize
                         if (nFiles == nFileProcess){
